@@ -1,0 +1,212 @@
+<html>
+<head>
+<title>Loot Tool for 5e D&D</title>
+<meta charset="UTF-8">
+<meta name="author" content="Mike Risher">
+<meta name="description" content="This converts your party's loot to the coin of your choice and splits it among all the party members.">
+<meta name="keywords" content="DnD, D&D, Dungeons and Dragons, coins, currency, convert, conversion, split, splitting, loot, money, 5e, 5th, 5th edition">
+<style>
+
+h2 {
+	text-align: center;
+}
+
+body {
+	font: 12pt helvetica;
+	width: 480px;
+	background-color: #eee8dc;
+	margin: 0;
+}
+
+html {
+	background-color: white;
+}
+
+label{
+    display: inline-block;
+    float: left;
+    clear: left;
+    width: 50%;
+    text-align: right;
+}
+
+#lTop {
+	float: left;
+	width: 35%;
+	position: static;
+	margin-bottom: 1em;
+	padding-left: 3em;
+
+}
+
+#rTop {
+	float: right;
+	width: 45%;
+	margin-left: 2em;
+}
+
+
+#noElectrum {
+	padding-top: 1em;
+}
+
+#gemsMessage {
+	clear:both;
+	padding-top: 0.5em;
+	text-align: center;
+	
+}
+
+#gems {
+	padding-top: 0.5em;
+	margin-bottom: 1em;
+
+}
+
+#coins {
+	margin: 1em 0;
+}
+
+#coins input {
+  display: inline-block;
+  float: left;
+  margin-left: .5em;
+  width: 75px;
+}
+
+#gems input {
+  display: inline-block;
+  float: left;
+  margin-left: .5em;
+  width: 75px;
+}
+
+#noElectrum {
+	clear: both;
+	text-align: center;
+}
+
+#choose {
+	padding: 1em 0;
+	clear: both;
+	text-align: center;
+}
+
+#choose button {
+	margin: 0 2em;
+}
+
+#result {
+	margin-left: 1em;
+}
+
+</style>
+</head> 
+<body>
+<h2>Loot Tool for 5e D&D</h2>
+<div id="ltop">
+	10 copper = 1 silver<br>
+	10 silver = 1 gold
+</div>
+<div id="rtop">
+	5 silver = 1 electrum<br>
+	10 gold = 1 platinum
+</div> 
+
+
+<div id="coins">
+
+<label>Copper: </label> <input type="text" id="cp">
+<label>Silver: </label> <input type="text" id="sp"> 
+<label>Electrum: </label> <input type="text" id="ep">
+<label>Gold: </label> <input type="text" id="gp">
+<label>Platinum: </label> <input type="text" id="pp">
+</div>
+<div id="gemsMessage">(Enter value of gems and jewelry in gold pieces.)</div>
+<div id="gems">
+<label>Gems/Jewelry: </label> <input type="text" id="gem1"> 
+<label>Gems/Jewelry:</label> <input type="text" id="gem2"> 
+<label>Gems/Jewelry:</label> <input type="text" id="gem3"> 
+</div>
+
+<div id="noElectrum"><input type="checkbox" id="noElectrumCheck"> Don't convert to electrum pieces</div>
+
+<div id="choose">
+<select id="chooseCurrency">
+	
+	<option value="0">Convert to cp</option>
+	<option value="1">Convert to sp</option>
+	<option value="2">Convert to ep</option>
+	<option value="3" selected>Convert to gp</option>
+	<option value="4">Convert to pp</option>
+</select>
+<select id="split">
+	<option value="1">---</option>
+	<option value="2">Split 2 ways</option>
+	<option value="3">Split 3 ways</option>
+	<option value="4">Split 4 ways</option>
+	<option value="5">Split 5 ways</option>
+	<option value="6">Split 6 ways</option>
+	<option value="7">Split 7 ways</option>
+	<option value="8">Split 8 ways</option>
+	<option value="9">Split 9 ways</option>
+	
+</select><button onclick="convert()">Convert</button>
+</div>
+
+<div id="result"></div>
+
+<script language="javascript" type="text/javascript">
+function convert() {
+	names=["copper","silver","electrum","gold","platinum"];
+	values=[1,10,50,100,1000];
+	totalCp = document.getElementById("cp").value * 1 +  document.getElementById("sp").value * 10 +  document.getElementById("ep").value * 50 + document.getElementById("gp").value * 100 + document.getElementById("pp").value * 1000 + document.getElementById("gem1").value * 100 + document.getElementById("gem2").value * 100 + document.getElementById("gem3").value * 100;
+	totalText = "";
+	currencyChoice = document.getElementById("chooseCurrency").value * 1;
+	share = [0,0,0,0,0];
+	split = document.getElementById("split").value * 1;
+	
+	for(x=currencyChoice;x > 0; x--) {
+		
+		if (!((document.getElementById("noElectrumCheck").checked == true) && x==2)) {
+			y = Math.floor((totalCp / values[x]) / split);
+			totalCp -= y * values[x] * split;
+			share[x]=y;
+		} 
+
+	}
+
+	//copper is an exception
+	share[0]=Math.floor(totalCp / split);
+	totalCp -= share[0] * split;
+
+	for(player=1;player<=split;player++) {
+		if (split > 1) {
+			totalText += "Share #"+player+": ";	
+		}
+		for(x=currencyChoice;x>-1;x--) {
+			if (share[x]>0) {
+				if ((x!=currencyChoice)){
+					totalText+=", ";
+				}
+
+				//copper is an exception
+				if (x==0) {
+					extraCp=0;
+					if (totalCp > 0) {
+						extraCp=1;
+						totalCp--;
+					}
+					totalText += (share[0]+extraCp) + " " + names[x];	
+				} else {
+					totalText +=  share[x] + " " + names[x];	
+				}
+			}
+		}
+		totalText += "<br>";
+	}
+	document.getElementById("result").innerHTML = totalText;
+}
+</script>
+</body>
+</html>
